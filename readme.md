@@ -15,6 +15,10 @@ Mac의 크롬 브라우저 주소창에 chrome://inspect/#devices를 입력합�
 
 코드 수정 (여기서 저와 함께)
 설치: ./gradlew installDebug
+- 디바이스 연결 확인 : adb devices
+
+# 폰앱에서 localhost:3000으로 접속
+- adb reverse tcp:3000 tcp:3000
 
 로그 (내 앱만 보기):
 - 검색(grep): adb logcat | grep com.example.kotwebview

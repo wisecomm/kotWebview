@@ -32,7 +32,9 @@ class MainActivity : AppCompatActivity() {
         webView.addJavascriptInterface(WebAppInterface(this, webView), "AndroidBridge")
 
         // 5. URL 로딩 (운영 서버/로컬 서버 주소)
-        webView.loadUrl("https://m.naver.com/")
+//        webView.loadUrl("https://m.naver.com/")
+//        webView.loadUrl("http://localhost:3000/")
+        webView.loadUrl("http://146.56.103.154:8080/")
 
         // 6. 뒤로가기 처리 (앱 종료 방지)
         val callback = object : OnBackPressedCallback(true) {
