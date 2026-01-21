@@ -19,6 +19,21 @@ class WebAppInterface(private val mContext: Context, private val webView: WebVie
         (mContext as? MainActivity)?.finish()
     }
 
+    /** 4. Web -> Native: 서버 에러 처리 */
+    @JavascriptInterface
+    fun handleServerError(message: String) {
+        if (mContext is MainActivity) {
+            mContext.runOnUiThread {
+                android.app.AlertDialog.Builder(mContext)
+                    .setTitle("서버 오류")
+                    .setMessage(message)
+                    .setPositiveButton("확인") { _, _ -> }
+                    .setCancelable(false)
+                    .show()
+            }
+        }
+    }
+
     /** 3. Native -> Web: 바코드 데이터 전달용 함수 (내부 호출용) */
     fun sendScanResult(data: String) {
         webView.post {
