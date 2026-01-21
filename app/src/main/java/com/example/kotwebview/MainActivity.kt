@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.webkit.WebChromeClient
+import android.webkit.JsResult
+import android.app.AlertDialog
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 
@@ -27,6 +30,40 @@ class MainActivity : AppCompatActivity() {
 
         // 3. 웹 클라이언트 설정 (앱 내에서 링크 열기)
         webView.webViewClient = WebViewClient()
+
+        // WebChromeClient 설정 (alert, confirm 대응)
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onJsConfirm(
+                view: WebView?,
+                url: String?,
+                message: String?,
+                result: JsResult?
+            ): Boolean {
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("알림")
+                    .setMessage(message)
+                    .setPositiveButton("확인") { _, _ -> result?.confirm() }
+                    .setNegativeButton("취소") { _, _ -> result?.cancel() }
+                    .setCancelable(false)
+                    .show()
+                return true
+            }
+
+            override fun onJsAlert(
+                view: WebView?,
+                url: String?,
+                message: String?,
+                result: JsResult?
+            ): Boolean {
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("알림")
+                    .setMessage(message)
+                    .setPositiveButton("확인") { _, _ -> result?.confirm() }
+                    .setCancelable(false)
+                    .show()
+                return true
+            }
+        }
 
         // 4. Javascript Interface 등록 (Web -> Native 호출용)
         webView.addJavascriptInterface(WebAppInterface(this, webView), "AndroidBridge")
