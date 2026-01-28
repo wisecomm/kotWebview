@@ -23,3 +23,5 @@ Mac의 크롬 브라우저 주소창에 chrome://inspect/#devices를 입력합�
 로그 (내 앱만 보기):
 - 검색(grep): adb logcat | grep com.example.kotwebview
 - 패키지 기준: adb logcat --pid=$(adb shell pidof -s com.example.kotwebview)
+
+./gradlew installDebug && adb shell am start -n com.example.kotwebview/.MainActivity
