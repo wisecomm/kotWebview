@@ -45,6 +45,14 @@ class WebViewManager(
             override fun onReceivedError(view: WebView?, request: android.webkit.WebResourceRequest?, error: android.webkit.WebResourceError?) {
                 super.onReceivedError(view, request, error)
                 Log.e("WebViewManager", "Page Error: ${error?.description}, Code: ${error?.errorCode}")
+
+                if (request?.isForMainFrame == true) {
+                    AlertDialog.Builder(context)
+                        .setTitle("오류")
+                        .setMessage("페이지를 로드할 수 없습니다.\n${error?.description}")
+                        .setPositiveButton("확인", null)
+                        .show()
+                }
             }
 
             override fun onReceivedHttpError(view: WebView?, request: android.webkit.WebResourceRequest?, errorResponse: android.webkit.WebResourceResponse?) {

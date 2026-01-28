@@ -19,11 +19,97 @@ import android.webkit.WebView
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.FileProvider
+import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 
 class WebAppInterface(private val mContext: Context, private val webView: WebView) {
+
+    /**
+     * [Unified Bridge Architecture]
+     * iOS와 Android의 통신 방식을 통일하기 위한 단일 진입점입니다.
+     * Web에서 JSON 문자열을 보냅니다: { "action": "LOGOUT", "data": { ... } }
+     */
+    @JavascriptInterface
+    fun postMessage(jsonString: String) {
+        try {
+            val jsonObject = JSONObject(jsonString)
+            val action = jsonObject.optString("action")
+            val data = jsonObject.optJSONObject("data")
+            val callbackId = jsonObject.optString("callbackId") // 응답이 필요한 경우 ID 수신
+
+            when (action) {
+                "LOGOUT" -> logout()
+                "EXIT_APP" -> exitApp()
+                "SHOW_TOAST" -> {
+                    val message = data?.optString("message") ?: ""
+                    showToast(message)
+                }
+                "ERROR_DIALOG" -> {
+                    val message = data?.optString("message") ?: "오류가 발생했습니다."
+                    handleServerError(message)
+                }
+                "GET_APP_VERSION" -> {
+                    // 데이터 반환 예시
+                    val versionInfo = JSONObject()
+                    try {
+                        val pInfo = mContext.packageManager.getPackageInfo(mContext.packageName, 0)
+                        versionInfo.put("versionName", pInfo.versionName)
+                        versionInfo.put("versionCode", if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) pInfo.longVersionCode else pInfo.versionCode)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    sendResponse(callbackId, versionInfo)
+                }
+                "DELAYED_WORK" -> {
+                    // 예: 별도 스레드에서 무언가 수행 (네트워크, DB 등)
+                    Thread {
+                        try {
+                            Thread.sleep(3000) // 3초 대기 (오래 걸리는 작업)
+                        } catch (e: InterruptedException) {}
+                        // 작업 완료 후, 나중에 응답 전송!
+                        // 메인 스레드에서 웹뷰를 호출해야 하므로 runOnUiThread 사용
+                        (mContext as? MainActivity)?.runOnUiThread {
+                            val resultData = JSONObject().put("status", "done")
+                            sendResponse(callbackId, resultData)
+                        }
+                    }.start()
+                }
+                else -> Log.w("WebAppInterface", "Unknown action: $action")
+            }
+        } catch (e: Exception) {
+            Log.e("WebAppInterface", "Bridge Error: ${e.message}")
+        }
+    }
+
+    /**
+     * Web으로 비동기 응답을 보냅니다. (Request-Response 패턴)
+     * Web에서 정의한 window.onNativeResponse(callbackId, dataString) 함수를 호출합니다.
+     */
+    private fun sendResponse(callbackId: String?, data: JSONObject) {
+        if (callbackId.isNullOrEmpty()) return
+
+        val responseString = data.toString()
+        webView.post {
+            // Android KitKat 이상에서는 evaluateJavascript 사용 권장
+            val js = "javascript:if(window.onNativeResponse) { window.onNativeResponse('$callbackId', JSON.stringify($responseString)); }"
+            webView.evaluateJavascript(js, null)
+        }
+    }
+
+    /**
+     * Native에서 Web으로 이벤트를 보냅니다. (Event-Listening 패턴)
+     * 예: 푸시 알림 수신, 배터리 부족, 센서 데이터 등
+     * Web에서 정의한 window.onNativeEvent(eventName, dataString) 함수를 호출합니다.
+     */
+    fun sendEvent(eventName: String, data: JSONObject) {
+        val dataString = data.toString()
+        webView.post {
+            val js = "javascript:if(window.onNativeEvent) { window.onNativeEvent('$eventName', JSON.stringify($dataString)); }"
+            webView.evaluateJavascript(js, null)
+        }
+    }
 
 
     /** 1. Web -> Native: 토스트 메시지 띄우기 */
@@ -36,6 +122,14 @@ class WebAppInterface(private val mContext: Context, private val webView: WebVie
     @JavascriptInterface
     fun exitApp() {
         (mContext as? MainActivity)?.finish()
+    }
+
+    /** 3. Web -> Native: 로그아웃 (쿠키 삭제) */
+    @JavascriptInterface
+    fun logout() {
+        android.webkit.CookieManager.getInstance().removeAllCookies(null)
+        android.webkit.CookieManager.getInstance().flush()
+        Toast.makeText(mContext, "로그아웃 완료", Toast.LENGTH_SHORT).show()
     }
 
     /** 4. Web -> Native: 서버 에러 처리 */
