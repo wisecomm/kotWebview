@@ -74,7 +74,8 @@ class MainActivity : AppCompatActivity() {
         webViewManager.setup()
 
         // 3. URL 로딩
-        webView.loadUrl("http://134.185.106.168/")
+      //  webView.loadUrl("http://134.185.106.168/")
+        webView.loadUrl("http://192.168.2.7:3000/")
 
         // 4. 뒤로가기 처리
         val callback = object : OnBackPressedCallback(true) {
@@ -86,5 +87,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
         onBackPressedDispatcher.addCallback(this, callback)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // 앱이 백그라운드로 갈 때 쿠키를 확실하게 저장
+        android.webkit.CookieManager.getInstance().flush()
     }
 }

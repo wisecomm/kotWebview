@@ -132,6 +132,13 @@ class WebAppInterface(private val mContext: Context, private val webView: WebVie
         Toast.makeText(mContext, "로그아웃 완료", Toast.LENGTH_SHORT).show()
     }
 
+    /** 3-1. Web -> Native: 쿠키 동기화 강제 (로그인 성공 직후 호출) */
+    @JavascriptInterface
+    fun syncCookies() {
+        android.webkit.CookieManager.getInstance().flush()
+        // Log.d("WebAppInterface", "Cookie Sync Triggered from Web")
+    }
+
     /** 4. Web -> Native: 서버 에러 처리 */
     @JavascriptInterface
     fun handleServerError(message: String) {

@@ -35,6 +35,11 @@ class WebViewManager(
         webSettings.allowContentAccess = true
         webSettings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
 
+        // 쿠키 설정 (로그인 세션 유지)
+        val cookieManager = CookieManager.getInstance()
+        cookieManager.setAcceptCookie(true)
+        cookieManager.setAcceptThirdPartyCookies(webView, true)
+
         // 2. 웹 클라이언트 설정 (앱 내에서 링크 열기 및 에러 감지)
         webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
@@ -62,6 +67,7 @@ class WebViewManager(
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
+                
                 // JSON 에러 응답 감지 (status: error)
                 view?.evaluateJavascript(
                     """
