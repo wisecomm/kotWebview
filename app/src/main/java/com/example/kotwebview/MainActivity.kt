@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         webViewManager.setup()
 
         // 3. URL 로딩
-        webView.loadUrl("http://134.185.106.168/")
+        webView.loadUrl("http://158.180.67.194/")
         // 맥 접속 주소 (adb 연결 시) : ipconfig getifaddr en0
         //  webView.loadUrl("http://192.168.2.7:3000/")
 
