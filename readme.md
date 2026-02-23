@@ -32,3 +32,17 @@ db push app/build/outputs/apk/release/app-release.apk /sdcard/Download/
 
 // 맥 접속 주소
 ipconfig getifaddr en0
+
+
+# 구글 플레이스토어에 앱을 등록
+- signkey(서명키) :             storeFile = file("debug.keystore")
+
+- isMinifyEnabled = true  // false에서 true로 변경
+
+- aab 생성(구글 플레이스테이션용) : ./gradlew bundleRelease
+
+# 구글 플레이스토어에 앱을 등록
+- signkey(서명키) :             storeFile = file("release.jks")  : xe1412
+- isMinifyEnabled = true  // false에서 true로 변경
+- aab 생성(구글 플레이스토어 제출용) : ./gradlew bundleRelease
+- aab 생성 경로 : app/build/outputs/bundle/release/app-release.aab
