@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:633337967997:android:849987c9d35d71a6964814",
+        "mobilesdk_app_id": "1:633337967997:android:099f0f80651531e7964814",
         "android_client_info": {
-          "package_name": "com.example.kotwebview"
+          "package_name": "kr.co.softone.kotwebview"
         }
       },
       "oauth_client": [],

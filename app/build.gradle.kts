@@ -5,13 +5,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.kotwebview"
+    namespace = "kr.co.softone.kotwebview"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.example.kotwebview"
+        applicationId = "kr.co.softone.kotwebview"
         minSdk = 24
         targetSdk = 36
         versionCode = 2

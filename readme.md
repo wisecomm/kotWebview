@@ -22,10 +22,10 @@ Mac의 크롬 브라우저 주소창에 chrome://inspect/#devices를 입력합�
 - adb reverse tcp:3000 tcp:3000
 
 로그 (내 앱만 보기):
-- 검색(grep): adb logcat | grep com.example.kotwebview
-- 패키지 기준: adb logcat --pid=$(adb shell pidof -s com.example.kotwebview)
+- 검색(grep): adb logcat | grep kr.co.softone.kotwebview
+- 패키지 기준: adb logcat --pid=$(adb shell pidof -s kr.co.softone.kotwebview)
 
-./gradlew installDebug && adb shell am start -n com.example.kotwebview/.MainActivity
+./gradlew installDebug && adb shell am start -n kr.co.softone.kotwebview/.MainActivity
 
 // 폰 apk 복사 
 db push app/build/outputs/apk/release/app-release.apk /sdcard/Download/

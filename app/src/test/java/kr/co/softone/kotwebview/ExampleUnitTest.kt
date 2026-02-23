@@ -1,4 +1,4 @@
-package com.example.kotwebview
+package kr.co.softone.kotwebview
 
 import org.junit.Test
 

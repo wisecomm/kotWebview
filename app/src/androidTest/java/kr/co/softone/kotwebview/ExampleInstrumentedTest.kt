@@ -1,4 +1,4 @@
-package com.example.kotwebview
+package kr.co.softone.kotwebview
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.example.kotwebview", appContext.packageName)
+        assertEquals("kr.co.softone.kotwebview", appContext.packageName)
     }
 }

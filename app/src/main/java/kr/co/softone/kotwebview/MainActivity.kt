@@ -1,4 +1,4 @@
-package com.example.kotwebview
+package kr.co.softone.kotwebview
 
 import android.content.Intent
 import android.net.Uri
