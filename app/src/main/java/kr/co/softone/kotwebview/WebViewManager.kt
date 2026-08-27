@@ -24,6 +24,9 @@ class WebViewManager(
 ) {
 
     fun setup() {
+        // 0. 웹뷰 디버깅 활성화 (chrome://inspect/#devices 원격 디버깅용)
+        WebView.setWebContentsDebuggingEnabled(true)
+
         // 1. 웹뷰 설정 (WebSettings)
         val webSettings: WebSettings = webView.settings
         webSettings.javaScriptEnabled = true // 자바스크립트 활성화
