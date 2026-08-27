@@ -8,6 +8,7 @@ import android.os.Environment
 import android.util.Log
 import android.webkit.ConsoleMessage
 import android.webkit.CookieManager
+import android.webkit.GeolocationPermissions
 import android.webkit.JsResult
 import android.webkit.URLUtil
 import android.webkit.ValueCallback
@@ -31,6 +32,7 @@ class WebViewManager(
         val webSettings: WebSettings = webView.settings
         webSettings.javaScriptEnabled = true // 자바스크립트 활성화
         webSettings.domStorageEnabled = true // 로컬 스토리지 활성화
+        webSettings.setGeolocationEnabled(true) // 위치(Geolocation) 활성화
         webSettings.loadWithOverviewMode = true
         webSettings.useWideViewPort = true
         
@@ -158,6 +160,21 @@ class WebViewManager(
             override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
                 Log.d("WebViewConsole", "${consoleMessage?.message()} -- From line ${consoleMessage?.lineNumber()} of ${consoleMessage?.sourceId()}")
                 return true
+            }
+
+            override fun onGeolocationPermissionsShowPrompt(
+                origin: String?,
+                callback: GeolocationPermissions.Callback?
+            ) {
+                Log.d("WebViewManager", "onGeolocationPermissionsShowPrompt: $origin")
+                if (context is MainActivity) {
+                    context.requestLocationPermission { isGranted ->
+                        Log.d("WebViewManager", "Geolocation permission result: $isGranted for $origin")
+                        callback?.invoke(origin, isGranted, false)
+                    }
+                } else {
+                    callback?.invoke(origin, true, false)
+                }
             }
         }
 

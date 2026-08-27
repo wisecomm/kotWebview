@@ -4,17 +4,19 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.webkit.ValueCallback
 import android.webkit.WebView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import android.util.Log
+import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
     private var fileUploadCallback: ValueCallback<Array<Uri>>? = null
+    private var locationPermissionCallback: ((Boolean) -> Unit)? = null
 
     private val fileChooserLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         Log.d("MainActivity", "File Chooser Result: ${result.resultCode}")
@@ -40,6 +42,40 @@ class MainActivity : AppCompatActivity() {
             fileUploadCallback?.onReceiveValue(null)
         }
         fileUploadCallback = null
+    }
+
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val fineGranted = permissions[android.Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+        val coarseGranted = permissions[android.Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
+        val isGranted = fineGranted || coarseGranted
+        Log.d("MainActivity", "Location Permission Result: fine=$fineGranted, coarse=$coarseGranted")
+        locationPermissionCallback?.invoke(isGranted)
+        locationPermissionCallback = null
+    }
+
+    fun requestLocationPermission(onResult: (Boolean) -> Unit) {
+        val fineGranted = ContextCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.ACCESS_FINE_LOCATION
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        val coarseGranted = ContextCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+        if (fineGranted || coarseGranted) {
+            onResult(true)
+        } else {
+            locationPermissionCallback = onResult
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
