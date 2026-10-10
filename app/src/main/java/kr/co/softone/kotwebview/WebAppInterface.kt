@@ -278,11 +278,4 @@ class WebAppInterface(private val mContext: Context, private val webView: WebVie
 
         notificationManager.notify(System.currentTimeMillis().toInt(), notification)
     }
-
-    /** 3. Native -> Web: 바코드 데이터 전달용 함수 (내부 호출용) */
-    fun sendScanResult(data: String) {
-        webView.post {
-            webView.evaluateJavascript("javascript:onScanResult('$data')", null)
-        }
-    }
 }

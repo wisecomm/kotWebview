@@ -3,6 +3,7 @@ package kr.co.softone.kotwebview
 import android.app.AlertDialog
 import android.app.DownloadManager
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
@@ -47,6 +48,41 @@ class WebViewManager(
 
         // 2. 웹 클라이언트 설정 (앱 내에서 링크 열기 및 에러 감지)
         webView.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean {
+                val uri = request?.url ?: return false
+                val url = uri.toString()
+
+                // http, https 는 웹뷰 내부에서 처리
+                if (url.startsWith("http://") || url.startsWith("https://")) {
+                    return false
+                }
+
+                // intent:, tel:, mailto:, sms: 등 외부 앱 및 스킴 처리
+                try {
+                    if (url.startsWith("intent:")) {
+                        val intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME)
+                        if (context.packageManager.resolveActivity(intent, 0) != null) {
+                            context.startActivity(intent)
+                            return true
+                        }
+                        // 앱 미설치 시 플레이스토어로 이동 시도
+                        val packageName = intent.`package`
+                        if (!packageName.isNullOrEmpty()) {
+                            val marketIntent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName"))
+                            context.startActivity(marketIntent)
+                            return true
+                        }
+                    } else {
+                        val intent = Intent(Intent.ACTION_VIEW, uri)
+                        context.startActivity(intent)
+                        return true
+                    }
+                } catch (e: Exception) {
+                    Log.e("WebViewManager", "Failed to handle scheme: $url", e)
+                }
+                return true
+            }
+
             override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 Log.d("WebViewManager", "Page Started: $url")

@@ -1,14 +1,18 @@
 package kr.co.softone.kotwebview
 
+import android.content.Context
 import android.content.Intent
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.webkit.ValueCallback
 import android.webkit.WebView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 
@@ -51,6 +55,9 @@ class MainActivity : AppCompatActivity() {
         val coarseGranted = permissions[android.Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
         val isGranted = fineGranted || coarseGranted
         Log.d("MainActivity", "Location Permission Result: fine=$fineGranted, coarse=$coarseGranted")
+        if (isGranted) {
+            checkLocationServiceEnabled()
+        }
         locationPermissionCallback?.invoke(isGranted)
         locationPermissionCallback = null
     }
@@ -66,6 +73,7 @@ class MainActivity : AppCompatActivity() {
         ) == android.content.pm.PackageManager.PERMISSION_GRANTED
 
         if (fineGranted || coarseGranted) {
+            checkLocationServiceEnabled()
             onResult(true)
         } else {
             locationPermissionCallback = onResult
@@ -75,6 +83,23 @@ class MainActivity : AppCompatActivity() {
                     android.Manifest.permission.ACCESS_COARSE_LOCATION
                 )
             )
+        }
+    }
+
+    private fun checkLocationServiceEnabled() {
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+        val isGpsEnabled = locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) ?: false
+        val isNetworkEnabled = locationManager?.isProviderEnabled(LocationManager.NETWORK_PROVIDER) ?: false
+
+        if (!isGpsEnabled && !isNetworkEnabled) {
+            AlertDialog.Builder(this)
+                .setTitle("위치 서비스 필요")
+                .setMessage("현재 위치를 확인하려면 기기의 위치(GPS) 설정을 켜주세요.")
+                .setPositiveButton("설정으로 이동") { _, _ ->
+                    startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                }
+                .setNegativeButton("취소", null)
+                .show()
         }
     }
 
@@ -119,9 +144,24 @@ class MainActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, callback)
     }
 
+    override fun onResume() {
+        super.onResume()
+        webView.onResume()
+    }
+
+    override fun onPause() {
+        webView.onPause()
+        super.onPause()
+    }
+
     override fun onStop() {
         super.onStop()
         // 앱이 백그라운드로 갈 때 쿠키를 확실하게 저장
         android.webkit.CookieManager.getInstance().flush()
+    }
+
+    override fun onDestroy() {
+        webView.destroy()
+        super.onDestroy()
     }
 }

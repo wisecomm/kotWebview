@@ -1,7 +1,16 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("com.google.gms.google-services")
+}
+
+val localProps = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) {
+        file.inputStream().use { load(it) }
+    }
 }
 
 android {
@@ -23,9 +32,9 @@ android {
     signingConfigs {
         create("release") {
             storeFile = file("../release.jks")
-            storePassword = "xe1412"
-            keyAlias = "key0"
-            keyPassword = "xe1412"
+            storePassword = localProps.getProperty("RELEASE_STORE_PASSWORD", "xe1412")
+            keyAlias = localProps.getProperty("RELEASE_KEY_ALIAS", "key0")
+            keyPassword = localProps.getProperty("RELEASE_KEY_PASSWORD", "xe1412")
         }
     }
 
