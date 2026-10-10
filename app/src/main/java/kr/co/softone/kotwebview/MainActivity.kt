@@ -81,13 +81,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 권한 요청 (Android 13+)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
-            }
-        }
-
         // 1. 웹뷰 인스턴스 생성 및 레이아웃 설정
         webView = WebView(this)
         setContentView(webView)
@@ -110,17 +103,17 @@ class MainActivity : AppCompatActivity() {
         webViewManager.setup()
 
         // 3. URL 로딩
-        webView.loadUrl("http://158.180.67.194/")
-        // 맥 접속 주소 (adb 연결 시) : ipconfig getifaddr en0
-        //  webView.loadUrl("http://192.168.2.7:3000/")
+        webView.loadUrl("https://oneday-trip.vercel.app")
 
         // 4. 뒤로가기 처리
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (webView.canGoBack()) {
                     webView.goBack()
-                } 
-                // 웹뷰 히스토리가 없으면 기본 동작(종료)을 하지 않음 (기획 의도에 따라 변경 가능)
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
             }
         }
         onBackPressedDispatcher.addCallback(this, callback)

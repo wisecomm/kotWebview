@@ -170,10 +170,10 @@ class WebViewManager(
                 if (context is MainActivity) {
                     context.requestLocationPermission { isGranted ->
                         Log.d("WebViewManager", "Geolocation permission result: $isGranted for $origin")
-                        callback?.invoke(origin, isGranted, false)
+                        callback?.invoke(origin, isGranted, true)
                     }
                 } else {
-                    callback?.invoke(origin, true, false)
+                    callback?.invoke(origin, true, true)
                 }
             }
         }
